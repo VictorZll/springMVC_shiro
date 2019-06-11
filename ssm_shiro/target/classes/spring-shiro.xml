@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+
+	<!-- 将凭证匹配器纳入IOC容器中 -->
+	<bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+		<property name="hashAlgorithmName" value="Md5"/>
+		<property name="hashIterations" value="100"/>
+		<property name="storedCredentialsHexEncoded" value="true"/>
+	</bean>
+	<!-- 将自定义的realm加入到IOC容器中 -->
+	<bean id="myRealm" class="com.newroad.ssm_shiro.system.realm.MyRealm">
+		<property name="credentialsMatcher" ref="credentialsMatcher"/>
+	</bean>
+	
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realms" ref="myRealm"/>
+	</bean>
+	
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager"/>
+		<property name="loginUrl" value="/login.jsp"/>
+		<property name="successUrl" value="/WEB-INF/jsp/index.jsp"/>
+		<property name="unauthorizedUrl" value="/error.jsp"/>
+		<property name="filterChainDefinitions">
+			<value>
+				/login=anon
+				/static/**=anon
+				/**=authc
+			</value>
+		</property>
+	</bean>
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+</beans>
